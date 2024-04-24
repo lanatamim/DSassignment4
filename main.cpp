@@ -10,14 +10,14 @@
 struct Node {
     double value;
     Node* next;
-
+    // Constructor
     Node(double v) : value(v), next(nullptr) {}
 };
 
 void printList(const std::list<Node*>& nodes) {
-    for (auto it = nodes.begin(); it != nodes.end(); ++it) {
-        std::cout << (*it)->value;
-        if (std::next(it) != nodes.end()) {
+    for (auto x = nodes.begin(); x != nodes.end(); ++x) {
+        std::cout << (*x)->value;
+        if (std::next(x) != nodes.end()) {
             std::cout << " -> ";
         }
     }
@@ -37,10 +37,10 @@ void createNodes(std::list<Node*>& nodes, int numNodes) {
 
 double result(Node* current, double slope) {
     if (current->next == nullptr) {
-        // Leaf node, return 1/2
+        // Leaf node
         return 0.5;
     } else {
-        // Multiply the result by slope
+        // Multipy result
         return result(current->next, slope * 0.5);
     }
 }
@@ -50,12 +50,11 @@ int main() {
 
     // 4 nodes
     createNodes(nodes, 4);
-
     printList(nodes);
 
     // Gadient descent operation
-    double result = result(nodes.front(), 0.5);
-    std::cout << "Gradient: " << result << std::endl;
+    double num = result(nodes.front(), 0.5);
+    std::cout << "Gradient: " << num << std::endl;
 
     // Memory
     for (Node* node : nodes) {
