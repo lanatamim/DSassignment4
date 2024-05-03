@@ -24,33 +24,51 @@ double activation(double x, double b) {
     return std::abs(std::tanh(x) - b);
 }
 
+// find min activation 
+/*
+If leaf node (ie, if successor is nullpointer)
+– Calculate activation function: abs[tanh (x) – b]
+▪ Else
+– Traverse successor node with arglist s.t. m is less steep by 10-x
+
+Derive and return result
+*/
+double findMinActivation(const std::list<Node*>& nodes, double b) {
+    double minActivation = std::numeric_limits<double>::max(); // Initialize with maximum possible value
+    
+    for (Node* node : nodes) {
+        double activated_value = activation(node->value, b);
+        if (activated_value < minActivation) {
+            minActivation = activated_value;
+        }
+    }
+    
+    return minActivation;
+}
+
 void printList(const std::list<Node*>& nodes, double b) {
-    double i = 0.0;
+    double minActivation = std::numeric_limits<double>::max();
+    double minX = 0.0; // Initialize with a default value
+    for (Node* node : nodes) {
+        double activated_value = activation(node->value, b);
+        if (activated_value < minActivation) {
+            minActivation = activated_value;
+            minX = node->value; // Update minX to the value of x corresponding to min activation
+        }
+    }
+
     for (auto x = nodes.begin(); x != nodes.end(); ++x) {
         double activated_value = activation((*x)->value, b);
-        std::cout << "X = " << (*x)->value << "  |  " << activated_value << std::endl;
-        ++i;
+        std::cout << "X = " << (*x)->value << "  |  Activation: " << activated_value << std::endl;
     }
     std::cout << std::endl;
+
+    std::cout << "Minimum Activation: " << minActivation << " at X = " << minX << std::endl;
 }
 
-std::pair<double, double> findMinActivation(Node* node, double b) {
-    double min_activation = std::numeric_limits<double>::max();
-    double min_x = 0.0; // Initialize min_x with 0.0
 
-    while (node != nullptr) {
-        double activated_value = activation(node->value, b);
-        std::cout << activation << std::endl;
-        if (activated_value < min_activation) {
-            min_activation = activated_value;
-            min_x = node->value; // Update min_x when a new minimum activation is found
-        }
 
-        node = node->next; // Move to the next node
-    }
 
-    return std::make_pair(min_activation, min_x);
-}
 
 int main() {
     int numNodes = 11;
@@ -63,11 +81,8 @@ int main() {
 
     double initial_bias = 0.5; 
     printList(nodes, initial_bias);
-
-    // Find minimum activation and corresponding x value
-    auto min_activation_and_x = findMinActivation(nodes.front(), initial_bias);
-
-    std::cout << "x value with lowest activation: " << "0.6" << std::endl;
+    
+    // output min activation
 
     // Memory cleanup
     for (Node* node : nodes) {
