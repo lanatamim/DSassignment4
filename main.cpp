@@ -2,6 +2,7 @@
    Assignment 4
    Lana Tamim
 */
+
 #include <iostream>
 #include <list>
 #include <cmath>
@@ -37,12 +38,13 @@ double findMinActivation(const std::list<Node*>& nodes, double b) {
 
 void printList(const std::list<Node*>& nodes, double b) {
     double minActivation = std::numeric_limits<double>::max();
-    double minX = 0.0; // Initialize with a default value
+    double minX = 0.0;
     for (Node* node : nodes) {
         double activatedValue = activation(node->value, b);
         if (activatedValue < minActivation) {
+            // Update minX
             minActivation = activatedValue;
-            minX = node->value; // Update minX to the value of x corresponding to min activation
+            minX = node->value;
         }
     }
 
@@ -56,18 +58,17 @@ void printList(const std::list<Node*>& nodes, double b) {
 }
 
 int main() {
-    int numNodes = 11;
+    int iteration = 11;
     std::list<Node*> nodes;
 
     // Create nodes
-    for (int i = 0; i < numNodes; ++i) {
+    for (int i = 0; i < iteration; ++i) {
         nodes.push_back(new Node(value(i)));
     }
 
-    double initialBias = 0.5; 
-    printList(nodes, initialBias);
-    
-    // output min activation
+    // Output
+    double b = 0.5; 
+    printList(nodes, b);
 
     // Memory cleanup
     for (Node* node : nodes) {
