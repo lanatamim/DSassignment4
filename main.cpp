@@ -1,12 +1,12 @@
 /*
    Assignment 4
    Lana Tamim
-   Purpose: 
 */
 
 #include <iostream>
 #include <list>
 #include <cmath>
+#include <limits>
 
 struct Node {
     double value;
@@ -17,58 +17,70 @@ struct Node {
 
 double value(int position) {
     // 1 << position = 2^position
-    return 0.5 / (1 << position);
+    return 0.1 * position;
 }
 
-void createNodes(std::list<Node*>& nodes, int numNodes) {
-    for (int i = 0; i < numNodes; ++i) {
-        nodes.push_back(new Node(value(i)));
-    }
-}
-
-double activationFunction(double x, double b) {
+double activation(double x, double b) {
     return std::abs(std::tanh(x) - b);
 }
 
 void printList(const std::list<Node*>& nodes, double b) {
-     for (auto x = nodes.begin(); x != nodes.end(); ++x) {
-        double activated_value = activationFunction((*x)->value, b);
-        std::cout << activated_value;
-        if (std::next(x) != nodes.end()) {
-            std::cout << " -> ";
-        }
+    int i = 0;
+    for (auto x = nodes.begin(); x != nodes.end(); ++x) {
+        double activated_value = activation((*x)->value, b);
+        std::cout << "X = " << (*x)->value << "  |  " << activated_value << std::endl;
+        ++i;
     }
     std::cout << std::endl;
 }
 
-double gradientDescent(Node* current, double b, double m) {
-    if (current->next == nullptr) {
-        // Leaf node
-        return activationFunction(current->value, b);
-    } else {
-        // Traverse successor
-        double newSlope = m - pow(10, -current->value);
-        // Bias ???
-        double newBias = b + current->value / 10.0;
-        return gradientDescent(current->next, newBias, newSlope);
+std::pair<double, double> findMinActivation(Node* current, double b, double m, double min_activation, double min_x) {
+    // Calculate activation value for the current node
+    double activated_value = activation(current->value, b);
+
+    // Check if the current activation value is smaller than the minimum activation found so far
+    if (activated_value < min_activation) {
+        min_activation = activated_value;
+        min_x = current->value;
     }
+
+    // If there's a successor node, continue traversing the list recursively
+    if (current->next != nullptr) {
+        // Update slope and bias for the next node
+        double newSlope = m - pow(10, -current->value);
+        double newBias = b + current->value / 10.0;
+
+        // Recursively call the function for the next node
+        std::pair<double, double> result = findMinActivation(current->next, newBias, newSlope, min_activation, min_x);
+
+        // Update minimum activation and corresponding x value based on the result from the next node
+        min_activation = result.first;
+        min_x = result.second;
+    }
+
+    return {min_activation, min_x};
 }
 
+
 int main() {
+    int numNodes = 11;
     std::list<Node*> nodes;
 
-    createNodes(nodes, 4);
-    double initial_bias = -0.5; // Initial bias
-    printList(nodes, initial_bias); // Pass initial bias here
+    // Create nodes
+    for (int i = 0; i < numNodes; ++i) {
+        nodes.push_back(new Node(value(i)));
+    }
 
-    // Gradient descent operation
-    double initial_slope = 0.5; // Initial slope
-    double gradient_result = gradientDescent(nodes.front(), initial_bias, initial_slope);
-    std::cout << "Gradient: " << gradient_result << std::endl;
+    double initial_bias = 0.5; 
+    std::cout << "Initial Bias: " << initial_bias << std::endl;
+    printList(nodes, initial_bias);
 
-    // Output slope and bias values
-    std::cout << "Slope: " << initial_slope << std::endl;
-    std::cout << "Bias: " << initial_bias << std::endl;
+    // Gradient descent
+    double initial_slope = 1.0;
+    double initial_min_activation = std::numeric_limits<double>::max();
+    // Find the minimum value and output
+    auto min_activation_and_x = findMinActivation(nodes.front(), initial_bias, initial_slope, initial_min_activation, 0.0);
+    std::cout << "x value with lowest activation: " << min_activation_and_x.second << std::endl;
 
     // Memory cleanup
     for (Node* node : nodes) {
@@ -78,63 +90,15 @@ int main() {
     return 0;
 }
 
+// back propagation
+// azumit o.6
+// iterations 11
+// increment 0.1
+// activation abs::tanh(x)
+// passing down x value after activation
+// get the min result
+// caller multiplies it by n and returns x
+// double azimuth[] = {0.0, - 1.0}
+// x = 0.0 b = 0.5 m = 1.0
+// 0.037
 
-
-/* struct Node {
-    double value;
-    // Node pointer
-    Node* next;
-    // Constructor
-    Node(double v) : value(v), next(nullptr) {}
-};
-
-void printList(const std::list<Node*>& nodes) {
-    for (auto x = nodes.begin(); x != nodes.end(); ++x) {
-        std::cout << (*x)->value;
-        if (std::next(x) != nodes.end()) {
-            std::cout << " -> ";
-        }
-    }
-    std::cout << std::endl;
-}
-
-double value(int position) {
-    // Generate value: 0.5, 0.25, 0.125, 0.0625
-    return 0.5 / (1 << position); // 1 << position = 2^position
-}
-
-void createNodes(std::list<Node*>& nodes, int numNodes) {
-    for (int i = 0; i < numNodes; ++i) {
-        nodes.push_back(new Node(value(i)));
-    }
-}
-
-double result(Node* current, double slope) {
-    if (current->next == nullptr) {
-        // Leaf node
-        return 0.5;
-    } else {
-        // Multipy result
-        return result(current->next, slope * 0.5);
-    }
-}
-
-int main() {
-    std::list<Node*> nodes;
-
-    // 4 nodes
-    createNodes(nodes, 4);
-    printList(nodes);
-
-    // Gadient descent operation
-    double num = result(nodes.front(), 0.5);
-    std::cout << "Gradient: " << num << std::endl;
-
-    // Memory
-    for (Node* node : nodes) {
-        delete node;
-    }
-
-    return 0;
-}
-*/
